@@ -4,15 +4,13 @@ import sys
 from random import randrange
 import time
 
-randnum = randrange(50, 100)
-
 context = zmq.Context()
 
 socket = context.socket(zmq.PUB)
 
 addStr = []
 # second and more argument is server ip
-for i in range(3, len(sys.argv)):
+for i in range(4, len(sys.argv)):
     srv_addr = sys.argv[i]
     addStr.append(srv_addr)
 
@@ -26,8 +24,11 @@ strength = int(sys.argv[1]) if len(sys.argv) > 1 else 0
 zipcode = int(sys.argv[2]) if len(sys.argv) > 1 else 37215
 print("send zipcode %i" % zipcode)
 
-ShutDownTime = 0
-while ShutDownTime < 1000:
+#this flag is introduced to indicate whether this publisher will be failed down after 20 secs.
+flag = sys.argv[3]
+cur = time.time()
+
+while True:
 
     temperature = randrange(-80, 135)
     relhumidity = randrange(10, 60)
@@ -36,9 +37,8 @@ while ShutDownTime < 1000:
 
     # print "send messages"
     sleep(2)
-    ShutDownTime+=1
 
-    if ShutDownTime == randnum:
+    if flag == '1' and time.time() - cur > 20:
         failedstr = 'pubfailed'
         socket.send_string("%i %s" % (zipcode, failedstr))
         break

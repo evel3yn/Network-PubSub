@@ -12,6 +12,7 @@ buffer1 = Queue.Queue()
 
 buffer2 = Queue.Queue()
 ##########################################################################################################
+# main funciton (part 1)
 randnum = randrange(50, 1000)
 # connext the socket
 context = zmq.Context()
@@ -36,6 +37,8 @@ for i in range(1, len(sys.argv)):
 
 ##########################################################################################################
 # Hash Ring
+
+
 class myHashRing():
     def __init__(self, add):
         self.ring = HashRing(add)

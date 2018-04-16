@@ -82,7 +82,7 @@ while True:
             a += 1
         timeSub=time.time()
         timeFlo=float(timeStr)
-        timeUse=float(timeFlo-timeSub)
+        timeUse=float(timeSub - timeFlo)
         print('This is received message')
         print("Topic: %s, Temperature: %s, Humidity: %s, Strength: %s timeusing: %f" % (
             zipcodeStr, temperatureStr, relhumidityStr, strengthStr, timeUse))
