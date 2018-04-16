@@ -17,7 +17,7 @@ for i in range(3, len(sys.argv)):
     addStr.append(srv_addr)
 
 for addr in addStr:
-    socket.connect("tcp://" + addr + ":5556")
+    socket.connect("tcp://" + "localhost:" + str(int(addr)*2 + 1))
 
 # first argument is strength of pub, 0~...
 strength = int(sys.argv[1]) if len(sys.argv) > 1 else 0

@@ -23,7 +23,7 @@ socket.setsockopt(zmq.SUBSCRIBE, '')
 
 server = ring.get_node(zip_filter)
 
-socket.connect("tcp://" + server + ":5550")
+socket.connect("tcp://" + "localhost:" + str(int(server)*2 + 2))
 
 while True:
     zip = tem = rel = ['', '', '', '', '']
@@ -45,16 +45,16 @@ while True:
         solverSocket = context.socket(zmq.PUB)
         # connect all other server
         for addr in addStr:
-            solverSocket.connect("tcp://" + addr + ":5556")
+            solverSocket.connect("tcp://" + "localhost:" + str(int(addr)*2 + 1))
         # other server need remap
         socket.send_string("%s" % string)
         continue
 
     # pub failed
     if numBlank == 1:
-        print("pub failed")
         failedtopic, failedstring=string.split()
         if failedtopic==zip_filter:
+            print("pub failed")
             break
 
     if numBlank == 7:
