@@ -45,9 +45,20 @@ while True:
         solverSocket = context.socket(zmq.PUB)
         # connect all other server
         for addr in addStr:
-            solverSocket.connect("tcp://" + "localhost:" + str(int(addr)*2 + 1))
-        # other server need remap
-        solverSocket.send_string("%s" % string)
+            solverSocket.connect("tcp://" + "localhost:" + str(int(addr) * 2 + 1))
+
+        loop = 0
+        while loop < 15:
+            time.sleep(1)
+            solverSocket.send_string("%s" % string)
+            loop += 1
+        print("server failed messaged sent")
+
+        socket.disconnect("tcp://" + "localhost:" + portNow)
+        server = ring.get_node(team_filter)
+        portNow = str(int(server) * 2 + 2)
+        socket.connect("tcp://" + "localhost:" + portNow)
+
         continue
 
     # pub failed

@@ -94,7 +94,10 @@ class Receiver(threading.Thread):
                     buffer1.put(string)
             else:
                 # failed message
-                buffer1.put(string)
+                print("failed message" + string)
+                for serveradd in addStr:
+                    if serveradd == string:
+                        buffer1.put(string)
 
 
 ##########################################################################################################
