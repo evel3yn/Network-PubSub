@@ -17,13 +17,14 @@ ring = HashRing(addStr)
 
 # filter
 team_filter = sys.argv[1] if len(sys.argv) > 1 else "10001"
-# if isinstance(zip_filter, bytes):
-#     zip_filter = zip_filter.decode('ascii')
+
 socket.setsockopt(zmq.SUBSCRIBE, '')
 
 server = ring.get_node(team_filter)
 
-socket.connect("tcp://" + "localhost:" + str(int(server)*2 + 2))
+portNow = str(int(server) * 2 + 2)
+
+socket.connect("tcp://" + "localhost:" + portNow)
 
 while True:
     team = score = lost = ['', '', '', '', '']
@@ -87,7 +88,6 @@ while True:
         print("This is received history")
         a = 1
         for l in range(0, 5):
-            # if zipInt[l] == int(zip_filter):
             print("%ith point scored is %i" % (a, temInt[l]))
             print("%ith point lost is %i" % (a, lostInt[l]))
             a += 1
