@@ -16,18 +16,18 @@ for i in range(2, len(sys.argv)):
 ring = HashRing(addStr)
 
 # filter
-zip_filter = sys.argv[1] if len(sys.argv) > 1 else "10001"
+team_filter = sys.argv[1] if len(sys.argv) > 1 else "10001"
 # if isinstance(zip_filter, bytes):
 #     zip_filter = zip_filter.decode('ascii')
 socket.setsockopt(zmq.SUBSCRIBE, '')
 
-server = ring.get_node(zip_filter)
+server = ring.get_node(team_filter)
 
 socket.connect("tcp://" + "localhost:" + str(int(server)*2 + 2))
 
 while True:
-    zip = tem = rel = ['', '', '', '', '']
-    zipInt = temInt = relInt = [0, 0, 0, 0, 0]
+    team = score = lost = ['', '', '', '', '']
+    teamInt = temInt = lostInt = [0, 0, 0, 0, 0]
 
     i = 0
     print("ready to receive")
@@ -53,36 +53,36 @@ while True:
     # pub failed
     if numBlank == 1:
         failedtopic, failedstring=string.split()
-        if failedtopic==zip_filter:
+        if failedtopic==team_filter:
             print("pub failed")
             break
 
     if numBlank == 7:
-        zipcodeStr, temperatureStr, relhumidityStr, strengthStr, timeStr, zipHisStr, temHisStr, relHisStr = string.split()
-        if zipcodeStr != zip_filter:
-            print ("%s is not I want" % zipcodeStr)
+        teamStr, pointScoredStr, pointLostStr, strengthStr, timeStr, teamHisStr, scoredHisStr, lostHisStr = string.split()
+        if teamStr != team_filter:
+            print ("%s is not I want" % teamStr)
             continue
         # receive history
-        zip[0], zip[1], zip[2], zip[3], zip[4] = zipHisStr.split("/")
-        tem[0], tem[1], tem[2], tem[3], tem[4] = temHisStr.split("/")
-        rel[0], rel[1], rel[2], rel[3], rel[4] = relHisStr.split("/")
+        team[0], team[1], team[2], team[3], team[4] = teamHisStr.split("/")
+        score[0], score[1], score[2], score[3], score[4] = scoredHisStr.split("/")
+        lost[0], lost[1], lost[2], lost[3], lost[4] = lostHisStr.split("/")
 
         # turn the string to int
         for k in range(5):
-            zipInt[k] = int(zip[k])
-            temInt[k] = int(tem[k])
-            relInt[k] = int(rel[k])
+            teamInt[k] = int(team[k])
+            temInt[k] = int(score[k])
+            lostInt[k] = int(lost[k])
 
         print("This is received history")
         a = 1
         for l in range(0, 5):
             # if zipInt[l] == int(zip_filter):
-            print("%ith temperature is %i" % (a, temInt[l]))
-            print("%ith relhumidity is %i" % (a, relInt[l]))
+            print("%ith point scored is %i" % (a, temInt[l]))
+            print("%ith point lost is %i" % (a, lostInt[l]))
             a += 1
         timeSub=time.time()
         timeFlo=float(timeStr)
         timeUse=float(timeSub - timeFlo)
         print('This is received message')
-        print("Topic: %s, Temperature: %s, Humidity: %s, Strength: %s timeusing: %f" % (
-            zipcodeStr, temperatureStr, relhumidityStr, strengthStr, timeUse))
+        print("Topic: %s, pointScored: %s, pointLost: %s, Strength: %s timeusing: %f" % (
+            teamStr, pointScoredStr, pointLostStr, strengthStr, timeUse))
