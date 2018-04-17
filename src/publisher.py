@@ -22,7 +22,7 @@ strength = int(sys.argv[1]) if len(sys.argv) > 1 else 0
 
 #second argument is zipcode
 teamid = int(sys.argv[2]) if len(sys.argv) > 1 else 1
-print("send zipcode %i" % teamid)
+print("send teamId %i" % teamid)
 
 #this flag is introduced to indicate whether this publisher will be failed down after 20 secs.
 flag = sys.argv[3]
