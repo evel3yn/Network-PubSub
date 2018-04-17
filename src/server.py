@@ -262,11 +262,9 @@ class Processor(threading.Thread):
                     # sort the index reversely
                     sortedIndexList = sorted(indexList)
                     sortedIndexList.reverse()
-                    print(zipList)
                     for index in sortedIndexList:
                         hisList.pop(index)
                         zipList.pop(index)
-                        print(zipList)
 
             # send all history
             for his in hisList:
