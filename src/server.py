@@ -82,7 +82,6 @@ class Receiver(threading.Thread):
 
     def run(self):
         while not isEnd.getFlag():
-            print("ready to receive")
             string = socket.recv_string()
             print ("received message")
             if string.count(' ') != 0 and string.count(' ') != 1:
@@ -94,7 +93,7 @@ class Receiver(threading.Thread):
                     buffer1.put(string)
             else:
                 # failed message
-                print("failed message" + string)
+                print("failed message received: " + string)
                 for serveradd in addStr:
                     if serveradd == string:
                         buffer1.put(string)
@@ -171,10 +170,8 @@ class Processor(threading.Thread):
             while i < 5:
                 if buffer1.qsize() == 0:
                     continue
-                print ("ready to receive")
                 # blocking is default
                 string = buffer1.get()
-                print ("received message")
                 # if pubfailed
                 if string.count(' ') == 1:
                     buffer2.put("%s" % (string))
@@ -183,17 +180,14 @@ class Processor(threading.Thread):
                 if string.count(' ') == 0:
                     # need remap
                     if string in addStr:
+                        print('removing ' + string + ' from list and rehashing')
                         addStr.remove(string)
                         ring.reHash(addStr)
                     continue
                 # receive the message
                 team, pointScored, pointLost, strength, timePub = string.split()
-                #####################################################################################
-                print(team)
-                #####################################################################################
 
                 server = ring.getNode(team)
-                print(server)
                 if server != addStr[0]:
                     continue
                 else:
@@ -280,7 +274,6 @@ class Processor(threading.Thread):
                 buffer2.put("%i %i %i %i %f %s %s %s" % (
                     his.team, his.pointScored, his.pointLost, his.strength, his.timePub, his.teamHis, his.scoreHis,
                     his.lostHis))
-                print ("send message")
 
 
 ##########################################################################################################
