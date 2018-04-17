@@ -95,5 +95,5 @@ while True:
         timeFlo=float(timeStr)
         timeUse=float(timeSub - timeFlo)
         print('This is received message')
-        print("Topic: %s, pointScored: %s, pointLost: %s, Strength: %s timeusing: %f" % (
+        print("Team: %s, pointScored: %s, pointLost: %s, Strength: %s timeusing: %f" % (
             teamStr, pointScoredStr, pointLostStr, strengthStr, timeUse))
