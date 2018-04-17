@@ -86,6 +86,7 @@ class Receiver(threading.Thread):
                 # normal message
                 team, scoreget, scorelost, strength, timePub = string.split()
                 server = ring.getNode(team)
+                print("receiver" + server + " and myself is:" + addStr[0])
                 if server == addStr[0]:
                     # message with topic we want
                     buffer1.put(string)
@@ -163,9 +164,11 @@ class Processor(threading.Thread):
             # 5 History object
             hisList = []
             while i < 5:
+                if buffer1.qsize() == 0:
+                    continue
                 print ("ready to receive")
                 # blocking is default
-                string = socket.recv_string()
+                string = buffer1.get()
                 print ("received message")
                 # if pubfailed
                 if string.count(' ') == 1:
@@ -183,7 +186,9 @@ class Processor(threading.Thread):
                 #####################################################################################
                 print(zipcode)
                 #####################################################################################
+
                 server = ring.getNode(zipcode)
+                print(server)
                 if server != addStr[0]:
                     continue
                 else:
