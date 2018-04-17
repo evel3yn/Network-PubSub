@@ -21,8 +21,8 @@ for addr in addStr:
 strength = int(sys.argv[1]) if len(sys.argv) > 1 else 0
 
 #second argument is zipcode
-zipcode = int(sys.argv[2]) if len(sys.argv) > 1 else 37215
-print("send zipcode %i" % zipcode)
+teamid = int(sys.argv[2]) if len(sys.argv) > 1 else 1
+print("send zipcode %i" % teamid)
 
 #this flag is introduced to indicate whether this publisher will be failed down after 20 secs.
 flag = sys.argv[3]
@@ -30,15 +30,15 @@ cur = time.time()
 
 while True:
 
-    temperature = randrange(-80, 135)
-    relhumidity = randrange(10, 60)
+    pointScored = randrange(-80, 135)
+    pointLost = randrange(10, 60)
     pubTime=time.time()
-    socket.send_string("%i %i %i %i %f" % (zipcode, temperature, relhumidity, strength, pubTime))
+    socket.send_string("%i %i %i %i %f" % (teamid, pointScored, pointLost, strength, pubTime))
 
     # print "send messages"
     sleep(2)
 
     if flag == '1' and time.time() - cur > 20:
         failedstr = 'pubfailed'
-        socket.send_string("%i %s" % (zipcode, failedstr))
+        socket.send_string("%i %s" % (teamid, failedstr))
         break
