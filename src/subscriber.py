@@ -47,7 +47,7 @@ while True:
         for addr in addStr:
             solverSocket.connect("tcp://" + "localhost:" + str(int(addr)*2 + 1))
         # other server need remap
-        socket.send_string("%s" % string)
+        solverSocket.send_string("%s" % string)
         continue
 
     # pub failed

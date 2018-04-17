@@ -5,6 +5,7 @@ import sys
 from hash_ring import HashRing
 from random import randrange
 import threading
+import time
 
 ##########################################################################################################
 # Data structure to store received and sending out messages
@@ -18,22 +19,24 @@ randnum = randrange(50, 1000)
 context = zmq.Context()
 
 socket = context.socket(zmq.SUB)
-socket.bind("tcp://*:" + str(int(sys.argv[1]) * 2 + 1))
+socket.bind("tcp://*:" + str(int(sys.argv[2]) * 2 + 1))
 # subscribe all incoming topic
 socket.setsockopt(zmq.SUBSCRIBE, '')
 
 # send them seperately
 # only need one context
 socket2 = context.socket(zmq.PUB)
-socket2.bind("tcp://*:" + str(int(sys.argv[1]) * 2 + 2))
+socket2.bind("tcp://*:" + str(int(sys.argv[2]) * 2 + 2))
 
-# argument: the ip of all server
-# first is ip of this server
+# argument: the machine number of all servers
 addStr = []
-for i in range(1, len(sys.argv)):
+for i in range(2, len(sys.argv)):
     srv_addr = sys.argv[i]
     addStr.append(srv_addr)
 
+# first input should be a flag indicate whether the server instance will shut down after 20 sec.
+flag = sys.argv[1]
+cur = time.time()
 
 ##########################################################################################################
 # Hash Ring
@@ -84,9 +87,8 @@ class Receiver(threading.Thread):
             print ("received message")
             if string.count(' ') != 0 and string.count(' ') != 1:
                 # normal message
-                team, scoreget, scorelost, strength, timePub = string.split()
+                team, pointScored, pointLost, strength, timePub = string.split()
                 server = ring.getNode(team)
-                print("receiver" + server + " and myself is:" + addStr[0])
                 if server == addStr[0]:
                     # message with topic we want
                     buffer1.put(string)
@@ -103,15 +105,15 @@ class Receiver(threading.Thread):
 
 
 class History:
-    def __init__(self, zipc, tem, rel, stren, tim, zipH, temH, relH):
-        self.zipcode = int(zipc)
-        self.temperature = int(tem)
-        self.relhumidity = int(rel)
+    def __init__(self, teamc, scored, lost, stren, tim, teamH, scoredH, lostH):
+        self.team = int(teamc)
+        self.pointScored = int(scored)
+        self.pointLost = int(lost)
         self.strength = int(stren)
         self.timePub = float(tim)
-        self.zipHis = zipH
-        self.temHis = temH
-        self.relHis = relH
+        self.teamHis = teamH
+        self.scoreHis = scoredH
+        self.lostHis = lostH
 
 
 #######################################################################################################################
@@ -121,23 +123,23 @@ class History:
 class Processor(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
-        self.zipcodeArrayHis = Queue.Queue()
-        self.temperatureArrayHis = Queue.Queue()
-        self.relhumidityArrayHis = Queue.Queue()
-        self.zipcodeArrayHisT = Queue.Queue()
-        self.temperatureArrayHisT = Queue.Queue()
-        self.relhumidityArrayHisT = Queue.Queue()
+        self.teamArrayHis = Queue.Queue()
+        self.pointScoredArrayHis = Queue.Queue()
+        self.pointLostArrayHis = Queue.Queue()
+        self.teamArrayHisT = Queue.Queue()
+        self.pointScoredArrayHisT = Queue.Queue()
+        self.pointLostArrayHisT = Queue.Queue()
 
         # initialize history
         for x in range(0, 5):
-            self.zipcodeArrayHis.put(0)
-            self.temperatureArrayHis.put(0)
-            self.relhumidityArrayHis.put(0)
+            self.teamArrayHis.put(0)
+            self.pointScoredArrayHis.put(0)
+            self.pointLostArrayHis.put(0)
 
         # initialize new history
-        self.zipNewHis = 0
-        self.temNewHis = 0
-        self.relNewHis = 0
+        self.teamNewHis = 0
+        self.scoreNewHis = 0
+        self.lostNewHis = 0
 
     # return all zipcode if it has same element
     def checksame(self, zlist):
@@ -182,63 +184,63 @@ class Processor(threading.Thread):
                         ring.reHash(addStr)
                     continue
                 # receive the message
-                zipcode, temperature, relhumidity, strength, timePub = string.split()
+                team, pointScored, pointLost, strength, timePub = string.split()
                 #####################################################################################
-                print(zipcode)
+                print(team)
                 #####################################################################################
 
-                server = ring.getNode(zipcode)
+                server = ring.getNode(team)
                 print(server)
                 if server != addStr[0]:
                     continue
                 else:
                     # store the data
                     # push in the new history
-                    self.zipcodeArrayHis.put(self.zipNewHis)
-                    self.temperatureArrayHis.put(self.temNewHis)
-                    self.relhumidityArrayHis.put(self.relNewHis)
+                    self.teamArrayHis.put(self.teamNewHis)
+                    self.pointScoredArrayHis.put(self.scoreNewHis)
+                    self.pointLostArrayHis.put(self.lostNewHis)
 
                     # pop up the old history
-                    self.zipcodeArrayHis.get()
-                    self.temperatureArrayHis.get()
-                    self.relhumidityArrayHis.get()
+                    self.teamArrayHis.get()
+                    self.pointScoredArrayHis.get()
+                    self.pointLostArrayHis.get()
 
                     # next time this should be pushed in history queue
-                    self.zipNewHis = int(zipcode)
-                    self.temNewHis = int(temperature)
-                    self.relNewHis = int(relhumidity)
+                    self.teamNewHis = int(team)
+                    self.scoreNewHis = int(pointScored)
+                    self.lostNewHis = int(pointLost)
 
                     # copy queue
-                    self.zipcodeArrayHisT.queue = copy.deepcopy(self.zipcodeArrayHis.queue)
-                    self.temperatureArrayHisT.queue = copy.deepcopy(self.temperatureArrayHis.queue)
-                    self.relhumidityArrayHisT.queue = copy.deepcopy(self.relhumidityArrayHis.queue)
+                    self.teamArrayHisT.queue = copy.deepcopy(self.teamArrayHis.queue)
+                    self.pointScoredArrayHisT.queue = copy.deepcopy(self.pointScoredArrayHis.queue)
+                    self.pointLostArrayHisT.queue = copy.deepcopy(self.pointLostArrayHis.queue)
 
                     # History
                     # change to list and then use '/' as delimiter to make a string
-                    tempt = [self.zipcodeArrayHisT.get(), self.zipcodeArrayHisT.get(), self.zipcodeArrayHisT.get(),
-                             self.zipcodeArrayHisT.get(),
-                             self.zipcodeArrayHisT.get()]
-                    zipHis = '/'.join(str(e) for e in tempt)
-                    tempt = [self.temperatureArrayHisT.get(), self.temperatureArrayHisT.get(),
-                             self.temperatureArrayHisT.get(),
-                             self.temperatureArrayHisT.get(), self.temperatureArrayHisT.get()]
-                    temHis = '/'.join(str(e) for e in tempt)
-                    tempt = [self.relhumidityArrayHisT.get(), self.relhumidityArrayHisT.get(),
-                             self.relhumidityArrayHisT.get(),
-                             self.relhumidityArrayHisT.get(), self.relhumidityArrayHisT.get()]
-                    relHis = '/'.join(str(e) for e in tempt)
+                    tempt = [self.teamArrayHisT.get(), self.teamArrayHisT.get(), self.teamArrayHisT.get(),
+                             self.teamArrayHisT.get(),
+                             self.teamArrayHisT.get()]
+                    teamHis = '/'.join(str(e) for e in tempt)
+                    tempt = [self.pointScoredArrayHisT.get(), self.pointScoredArrayHisT.get(),
+                             self.pointScoredArrayHisT.get(),
+                             self.pointScoredArrayHisT.get(), self.pointScoredArrayHisT.get()]
+                    scoreHis = '/'.join(str(e) for e in tempt)
+                    tempt = [self.pointLostArrayHisT.get(), self.pointLostArrayHisT.get(),
+                             self.pointLostArrayHisT.get(),
+                             self.pointLostArrayHisT.get(), self.pointLostArrayHisT.get()]
+                    lostHis = '/'.join(str(e) for e in tempt)
 
                     # store the message in class array
                     hisList.append(
-                        History(zipcode, temperature, relhumidity, int(strength), float(timePub), zipHis, temHis,
-                                relHis))
+                        History(team, pointScored, pointLost, int(strength), float(timePub), teamHis, scoreHis,
+                                lostHis))
 
                     i += 1
 
             # get rid of the repeated topic hisList elements.
             # get all the zipcode
-            zipList = [hisList[0].zipcode, hisList[1].zipcode, hisList[2].zipcode, hisList[3].zipcode,
-                       hisList[4].zipcode]
+            zipList = [hisList[0].team, hisList[1].team, hisList[2].team, hisList[3].team,
+                       hisList[4].team]
 
             # get all the strength
             strengList = [hisList[0].strength, hisList[1].strength, hisList[2].strength, hisList[3].strength,
@@ -271,17 +273,11 @@ class Processor(threading.Thread):
 
             # send all history
             for his in hisList:
-                if shutDownTime == randnum:
-                    failedServerStr = 'serverfailed'
-                    buffer2.put("%s" % (sys.argv[1]))
                 # send last 5 infor (if repeated, not send)
                 buffer2.put("%i %i %i %i %f %s %s %s" % (
-                    his.zipcode, his.temperature, his.relhumidity, his.strength, his.timePub, his.zipHis, his.temHis,
-                    his.relHis))
+                    his.team, his.pointScored, his.pointLost, his.strength, his.timePub, his.teamHis, his.scoreHis,
+                    his.lostHis))
                 print ("send message")
-
-            if shutDownTime == randnum:
-                break
 
 
 ##########################################################################################################
@@ -296,9 +292,9 @@ class Sender(threading.Thread):
         while True:
             if buffer2.qsize() > 0:
                 string = buffer2.get()
-                if string.count(' ') == 0:
-                    # which means server failed,
-                    socket2.send_string(string)
+                if flag == '1' and time.time() - cur > 20:
+                    # if failed, send out our own machine number
+                    socket2.send_string(addStr[0])
                     isEnd.setFlag(True)
                 else:
                     # which means publisher failed or normal message
