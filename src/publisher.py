@@ -30,8 +30,8 @@ cur = time.time()
 
 while True:
 
-    pointScored = randrange(-80, 135)
-    pointLost = randrange(10, 60)
+    pointScored = randrange(80, 150)
+    pointLost = randrange(80, 140)
     pubTime=time.time()
     socket.send_string("%i %i %i %i %f" % (teamid, pointScored, pointLost, strength, pubTime))
 
