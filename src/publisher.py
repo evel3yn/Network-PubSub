@@ -40,5 +40,6 @@ while True:
 
     if flag == '1' and time.time() - cur > 20:
         failedstr = 'pubfailed'
+        print(failedstr)
         socket.send_string("%i %s" % (teamid, failedstr))
         break

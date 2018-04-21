@@ -91,12 +91,15 @@ class Receiver(threading.Thread):
                 if server == addStr[0]:
                     # message with topic we want
                     buffer1.put(string)
-            else:
-                # failed message
+            elif string.count(' ') == 0:
+                # server failed message
                 for serveradd in addStr:
                     if serveradd == string:
                         buffer1.put(string)
-                        print("failed message received: " + string)
+                        print("server failed message received: " + string)
+            else:
+                print("publisher failed: " + string)
+                buffer1.put(string)
 
 
 ##########################################################################################################
